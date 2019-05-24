@@ -1,5 +1,36 @@
 # React + Node.js Starter Pack
 
+## Skills we want you to show:
+- That you are an independent developer who writes clean code
+- That you can come up with a sensible architecture for your web app and pass information between components 
+- That you have a knack for visual design 
+- That you can engage with external APIs
+- That you can build software in a human-centered way
+
+
+## The Task:
+Your parents/best friend/childhood crush/etc… has just moved to a new city and you, as the creative hacker you are, want to create a mobile-web app that will help them in some way adjust to their new city, be creative ;)
+
+## The Deliverables:
+- Clearly state who you are designing for and what problem you are addressing for them
+Create a single-page mobile web app using a Node.js server, a React frontend and hosted on Heroku. 
+- The web app should display information from an external API of your choosing in an intuitive way. 
+  * Ex. Spotify https://developer.spotify.com/documentation/web-api/quick-start/
+- Allow the user to interact with the data and/or input their own preferences. 
+- Provide some recommendation or analysis based on the data displayed and the user’s preferences in a modal of some sort 
+
+* you are encouraged to leverage open sourced libraries, just cite them in the  README
+* you are encouraged to componentize your code where it makes sense
+* Bonus points if you leverage Machine Learning libraries such as ml5.js
+https://ml5js.org/
+* Bonus points if you leverage data visualization libraries such as D3
+https://d3js.org/
+* Bonus points if you integrate a cloud database such as firebase
+https://firebase.google.com/
+* Bonus points if you leverage mapping libraries such as Google Maps API
+https://developers.google.com/maps/documentation/
+* Bonus points for any other cool libraries you want to show off with ;)
+
 
 ## File Structure
 
