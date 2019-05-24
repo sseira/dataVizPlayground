@@ -14,22 +14,25 @@ Your parents/best friend/childhood crush/etc… has just moved to a new city and
 ## The Deliverables:
 - Clearly state who you are designing for and what problem you are addressing for them
 Create a single-page mobile web app using a Node.js server, a React frontend and hosted on Heroku. 
+
 - The web app should display information from an external API of your choosing in an intuitive way. 
   * Ex. Spotify https://developer.spotify.com/documentation/web-api/quick-start/
-- Allow the user to interact with the data and/or input their own preferences. 
+
+- Allow the user to interact with the data and/or input their own preferences.
+
 - Provide some recommendation or analysis based on the data displayed and the user’s preferences in a modal of some sort 
 
-* you are encouraged to leverage open sourced libraries, just cite them in the  README
-* you are encouraged to componentize your code where it makes sense
-* Bonus points if you leverage Machine Learning libraries such as ml5.js
-https://ml5js.org/
-* Bonus points if you leverage data visualization libraries such as D3
-https://d3js.org/
-* Bonus points if you integrate a cloud database such as firebase
-https://firebase.google.com/
-* Bonus points if you leverage mapping libraries such as Google Maps API
-https://developers.google.com/maps/documentation/
-* Bonus points for any other cool libraries you want to show off with ;)
+  * you are encouraged to leverage open sourced libraries, just cite them in the  README
+  * you are encouraged to componentize your code where it makes sense
+  * Bonus points if you leverage Machine Learning libraries such as ml5.js
+    * https://ml5js.org/
+  * Bonus points if you leverage data visualization libraries such as D3
+    * https://d3js.org/
+  * Bonus points if you integrate a cloud database such as firebase
+    * https://firebase.google.com/
+  * Bonus points if you leverage mapping libraries such as Google Maps API
+    * https://developers.google.com/maps/documentation/
+  * Bonus points for any other cool libraries you want to show off with ;)
 
 
 ## File Structure
