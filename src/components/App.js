@@ -2,6 +2,7 @@ import '../assets/stylesheets/base.scss'
 
 import React, { Component } from 'react'
 import * as Utility from './Utility.js'
+import ndjsonStream from 'can-ndjson-stream'
 
 // import ExampleSVG from '../assets/images/InfoIcon.svg'
 //        <ExampleSVG className='' />
@@ -16,12 +17,31 @@ import * as Utility from './Utility.js'
 
 class App extends Component {
 
-  componentWillMount() {
-  
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      data: [],
+    };
   }
+
 
   componentDidMount() {
 
+    console.log('did mount')
+    this.getRequestToServer('/getLocalData', this.appendData.bind(this))
+  }
+
+  appendData(new_item) {
+    console.log('callback')
+    console.log('client - ', new_item)
+    this.setState(state => {
+      const data = state.data.concat(new_item)
+
+      return {
+        data
+      }
+    })
   }
 
 
@@ -30,7 +50,9 @@ class App extends Component {
     return (
       <div>
       Build Awesome Things, <br/> I mean Hello World ;)
-
+      {this.state.data.map(item => (
+            <li key={item.timestamp}>{item.word}</li>
+          ))}
       </div> 
     
     )
@@ -46,16 +68,18 @@ class App extends Component {
   */
   getRequestToServer(path, callback) {
     fetch(path)
-      .then(function (response) {
-        return response.json()
-      }, function (error) { console.log('error- ' + error) })
-      .then(function (data) {
-        if (data) {
-          callback(data)
-        } else {
-          console.log('didnt get any data')
-        }
-      })
+      .then((response) => {
+        return ndjsonStream(response.body); //ndjsonStream parses the response.body
+      }).then((exampleStream) => {
+        let read;
+        let reader = exampleStream.getReader()
+        reader.read().then(read = (result) => {
+          if (result.done) return;
+          // console.log(result.value);
+          callback(result.value)
+          reader.read().then(read); //recurse through the stream
+        });
+      });
   }
 
 };

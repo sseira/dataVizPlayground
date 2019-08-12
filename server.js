@@ -6,6 +6,7 @@ var PORT = process.env.PORT || 8080
 var fs = require('fs');
 var https = require('https');
 var http = require('http');
+var ndjson = require('ndjson')
 
 
 /* ----- Password Protection ------ */
@@ -56,6 +57,26 @@ app.listen(PORT, function(error) {
 /* --------------- Load Local JSON ---------------- */
 
 app.get('/getLocalData', function(request, response) {
-  var local_data = JSON.parse(fs.readFileSync('data/my_data.json', 'utf8'))
-  response.json(local_data)
+  var chunks = []
+
+  fs.createReadStream('data/frog_small.ndjson')
+  .pipe(ndjson.parse())
+  .on('data', function(data) {
+    // readStream.pipe(res);
+    chunks.push(JSON.stringify(data))
+    // console.log(data)
+  })
+  .on('end', () => {
+
+    // not sure why we need the SetInterval...
+    const id = setInterval( () => {
+      if ( chunks.length ) {
+        response.write( chunks.shift() + "\n" );
+      } else {
+        clearInterval( id );
+        response.end();
+      }
+    }, 0 );
+  })
+
 })
