@@ -59,15 +59,12 @@ app.listen(PORT, function(error) {
 app.get('/getLocalData', function(request, response) {
   var chunks = []
 
-  fs.createReadStream('data/frog_small.ndjson')
+  fs.createReadStream('data/frog.ndjson')
   .pipe(ndjson.parse())
   .on('data', function(data) {
-    // readStream.pipe(res);
     chunks.push(JSON.stringify(data))
-    // console.log(data)
   })
   .on('end', () => {
-
     // not sure why we need the SetInterval...
     const id = setInterval( () => {
       if ( chunks.length ) {
@@ -76,7 +73,7 @@ app.get('/getLocalData', function(request, response) {
         clearInterval( id );
         response.end();
       }
-    }, 0 );
+    }, 500 );
   })
 
 })
