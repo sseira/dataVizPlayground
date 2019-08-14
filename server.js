@@ -59,7 +59,7 @@ app.listen(PORT, function(error) {
 app.get('/getLocalData', function(request, response) {
   var chunks = []
 
-  fs.createReadStream('data/frog.ndjson')
+  fs.createReadStream('data/frog_small.ndjson')
   .pipe(ndjson.parse())
   .on('data', function(data) {
     chunks.push(JSON.stringify(data))
@@ -73,7 +73,7 @@ app.get('/getLocalData', function(request, response) {
         clearInterval( id );
         response.end();
       }
-    }, 500 );
+    }, 1000 );
   })
 
 })
