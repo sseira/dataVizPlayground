@@ -11,19 +11,24 @@ import { localPoint } from "@vx/event";
 import { schemeSet1 } from 'd3-scale-chromatic';
 import { max } from 'd3-array'
 
+
+/* ------- Layout Constants ------- */
 const backgroundColor = "#32deaa",
       width = 400,
       height = 300,
       padding = 20,
       xMax = width - padding,
-      yMax = height - padding,
-      getNumStrokes = d => d.drawing.length,
+      yMax = height - padding
+
+/* ------- Data Accessors ------- */
+const getNumStrokes = d => d.drawing.length,
       getID = d => d.key_id
       
 
+
+
+
 class VxGraphs extends Component {
-
-
 /* ------- Data Processing ------- */
 
   prettifyPath(drawingPath) {
@@ -95,22 +100,13 @@ class VxGraphs extends Component {
     var eachBand = this.getNumStrokesScaleX().step(),
         index = Math.floor((x / eachBand)),
         d = data[index]
-        // key_id = this.getNumStrokesScaleX(xMax).domain()[index]
 
-
-    // const key_id = this.getNumStrokesScaleX(xMax).step()
-
-    // console.log('x - ', x)
-    console.log('data - ', data)
-    console.log('index - ', index)
-
-    // console.log('key_id - ', key_id)
-    console.log('------ ')
+    if(!d) return
 
     showTooltip({
       tooltipData: d,
       tooltipLeft: this.getNumStrokesScaleX()(getID(d)),
-      tooltipTop: this.getNumStrokesScaleY()(getNumStrokes(d)),
+      tooltipTop: height - this.getNumStrokesScaleY()(getNumStrokes(d)),
     });
   };
 
@@ -129,9 +125,9 @@ class VxGraphs extends Component {
 
               const id = getID(d),
                     barWidth = this.getNumStrokesScaleX().bandwidth(),
-                    barHeight = yMax - this.getNumStrokesScaleY()(getNumStrokes(d)),
+                    barHeight = this.getNumStrokesScaleY()(getNumStrokes(d)),
                     barX = this.getNumStrokesScaleX()(id),
-                    barY = yMax - barHeight,
+                    barY = height - barHeight,
                     color = this.scaleForColors()(getID(d))
 
               return (
@@ -172,14 +168,14 @@ class VxGraphs extends Component {
     
     return (
           <Tooltip
-            top={tooltipTop - 12}
-            left={tooltipLeft + 12}
+            top={tooltipTop}
+            left={tooltipLeft}
             style={{
               backgroundColor: "#5C77EB",
               color: "#FFF",
             }}
           >
-            {`$${getNumStrokes(tooltipData)}`}
+            {getNumStrokes(tooltipData)}
           </Tooltip>
     )
   }
