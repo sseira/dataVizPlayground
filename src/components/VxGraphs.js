@@ -176,8 +176,8 @@ class VxGraphs extends Component {
             top={tooltipTop}
             left={tooltipLeft}
             style={{
-              backgroundColor: "#5C77EB",
-              color: "#FFF",
+              backgroundColor: "#FFF",
+              color: "#000",
             }}
           >
           <div className='tooltip-container'>
