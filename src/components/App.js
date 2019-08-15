@@ -4,6 +4,7 @@ import React, { Component } from 'react'
 import * as Utility from './Utility.js'
 import ndjsonStream from 'can-ndjson-stream'
 import VxGraphs from './VxGraphs';
+import NivoGraphs from './NivoGraphs';
 
 
 
@@ -33,6 +34,10 @@ class App extends Component {
   }
 
   appendData(new_item) {
+
+    // aggregate data here 
+
+
     this.setState(state => {
       const data = state.data.concat(new_item)
       return {
@@ -49,6 +54,11 @@ class App extends Component {
         <VxGraphs
           data={this.state.data}
         />
+
+        <NivoGraphs
+          data={this.state.data}
+        />
+
       </div>
     )
   }

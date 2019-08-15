@@ -11,6 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@nivo/bar": "^0.59.2",
     "@vx/curve": "0.0.189",
     "@vx/event": "0.0.189",
     "@vx/group": "0.0.190",

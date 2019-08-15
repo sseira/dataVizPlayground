@@ -20,17 +20,17 @@ const backgroundColor = "#32deaa",
       xMax = width - padding,
       yMax = height - padding
 
+
+
 /* ------- Data Accessors ------- */
 const getNumStrokes = d => d.drawing.length,
       getID = d => d.key_id
       
 
 
-
-
 class VxGraphs extends Component {
-/* ------- Data Processing ------- */
 
+/* ------- Data Processing ------- */
   prettifyPath(drawingPath) {
     let prettyPath = []
     drawingPath[0].forEach((element, i)=> {
@@ -60,7 +60,6 @@ class VxGraphs extends Component {
     })
   }
 
-
   getNumStrokesScaleX() {
     return scaleBand({
       range: [0,xMax], 
@@ -77,7 +76,6 @@ class VxGraphs extends Component {
     })
   }
 
-
   getNumStrokesScaleY(){
     return scaleLinear({
       domain: [0, max(this.props.data, (d) => {return +d.drawing.length})],
@@ -91,9 +89,7 @@ class VxGraphs extends Component {
 
   // logic to decide whic data point is relevant based on the mouse position
   // and where to show the tooltip <div>
-  // { event, data, xSelector, xScale, yScale }
   handleTooltip(data, event){
-
 
     const { showTooltip } = this.props;
     const { x, y } = localPoint(event);
@@ -105,16 +101,35 @@ class VxGraphs extends Component {
 
     showTooltip({
       tooltipData: d,
-      tooltipLeft: this.getNumStrokesScaleX()(getID(d)),
-      tooltipTop: height - this.getNumStrokesScaleY()(getNumStrokes(d)),
+      tooltipLeft: xMax, //this.getNumStrokesScaleX()(getID(d)),
+      tooltipTop: 0 //height - this.getNumStrokesScaleY()(getNumStrokes(d)),
     });
   };
 
 
   /* ------- Rendering Helpers ------- */
 
+  renderEventListener() {
+    let {data, hideTooltip}  = this.props
+
+    return (            
+      <Bar
+        x={0}
+        y={0}
+        width={width}
+        height={height}
+        fill="transparent"
+        data={data}
+        onMouseMove={event => {
+          this.handleTooltip(data, event)
+        }}
+        onMouseLeave={() => {hideTooltip()}}
+      />
+    )
+  }
+
   drawBarGraph() {
-    let {data, tooltipData, showTooltip, hideTooltip}  = this.props
+    let {data, tooltipData}  = this.props
 
     return (
       <div>
@@ -144,18 +159,8 @@ class VxGraphs extends Component {
                 />
               );
             })}
-            <Bar
-              x={0}
-              y={0}
-              width={width}
-              height={height}
-              fill="transparent"
-              data={data}
-              onMouseMove={data, event => {
-                this.handleTooltip(data, event)
-              }}
-              onMouseLeave={data => event => hideTooltip()}
-            />
+
+            {this.renderEventListener()}
           </Group>
         </svg>
         {tooltipData && this.drawTooltip()}
@@ -175,7 +180,10 @@ class VxGraphs extends Component {
               color: "#FFF",
             }}
           >
-            {getNumStrokes(tooltipData)}
+          <div className='tooltip-container'>
+            {this.drawShape(tooltipData)}
+            {'numStrokes = ' + getNumStrokes(tooltipData)}
+          </div>
           </Tooltip>
     )
   }
@@ -233,7 +241,9 @@ class VxGraphs extends Component {
 
       {this.props.data.map(item => (
         <div key={item.timestamp}>
-        {this.drawShape(item)}
+        {
+          //this.drawShape(item)
+        }
         </div>
       ))}
       </div> 
