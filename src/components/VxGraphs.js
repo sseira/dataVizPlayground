@@ -2,33 +2,63 @@ import React, { Component } from 'react'
 
 import { curveNatural } from '@vx/curve'
 import { LinePath, Bar } from '@vx/shape'
-import { scaleLinear, scaleBand, scaleOrdinal } from '@vx/scale'
+import { scaleLinear, scaleBand, scaleOrdinal, scaleTime } from '@vx/scale'
 import { Group } from '@vx/group';
 import { withTooltip, Tooltip } from "@vx/tooltip";
 import { localPoint } from "@vx/event";
 
 
+
+import { cityTemperature, appleStock } from "@vx/mock-data";
+
+
 import { schemeSet1 } from 'd3-scale-chromatic';
-import { max } from 'd3-array'
+import { max, extent, bisector } from 'd3-array'
 
 
 /* ------- Layout Constants ------- */
 const backgroundColor = "#32deaa",
-      width = 400,
-      height = 300,
+      width = 600,
+      height = 400,
       padding = 20,
       xMax = width - padding,
-      yMax = height - padding
+      yMax = height - padding,
+      color1 = 'black',
+      color2 = 'gray'
 
 
 
 /* ------- Data Accessors ------- */
+//should be their own functions 
 const getNumStrokes = d => d.drawing.length,
-      getID = d => d.key_id
-      
+      getID = d => d.key_id,
+      getCountry = d =>d.countrycode,
+      getNumDrawings = d => d.key_ids.length,
+      selectDate = d => new Date(d.date.slice(0,4),d.date.slice(4,6),d.date.slice(6,8)), 
+      selectTemperature_NY = d => d['New York'],
+      selectTemperature_SF = d => d['San Francisco'],
+      selectTemperature_AU = d => d.close //['Austin']
+
+     
+    
+
+
+/* ------ Global Scales ??? ------- */
+const dateScale = scaleTime({
+    range: [0, width],
+    domain: extent(cityTemperature, selectDate) 
+  })
 
 
 class VxGraphs extends Component {
+
+  constructor(props) {
+    super(props);
+    this.handleDrag = this.handleDrag.bind(this);
+    this.finishDrag = this.finishDrag.bind(this);
+  }
+
+
 
 /* ------- Data Processing ------- */
   prettifyPath(drawingPath) {
@@ -46,30 +76,31 @@ class VxGraphs extends Component {
 
 
   /* ------- Scales ------- */
+  //rename
   getYScale(data, y, yMax) {
     return scaleLinear({
-      domain: [0, max(data, y)],
-      range: [0, yMax]
+      range: [0, yMax],
+      domain: [0, max(data, y)]
     })
   }
 
   getXScale(data, x, xMax){
     return scaleLinear({
-      domain: [0, max(data, x)],
-      range: [0, xMax]
+      range: [0, xMax],
+      domain: [0, max(data, x)]
     })
   }
 
   getNumStrokesScaleX() {
     return scaleBand({
       range: [0,xMax], 
-      padding: 0.4,
-      domain: this.props.data.map(d => d.key_id)
+      domain: this.props.data.map(getCountry),
+      padding: 0.4
     })
   }
 
   scaleForColors() {
-    let domain = this.props.data.map(d => d.key_id)
+    let domain = this.props.data.map(getCountry)
     return scaleOrdinal({
       range: schemeSet1, 
       domain: domain
@@ -78,10 +109,52 @@ class VxGraphs extends Component {
 
   getNumStrokesScaleY(){
     return scaleLinear({
-      domain: [0, max(this.props.data, (d) => {return +d.drawing.length})],
-      range: [0, yMax]
+      range: [0, yMax],
+      domain: [0, max(this.props.data, getNumDrawings)]
     })
   }
+
+  dateScale(){
+    return scaleTime({
+      range: [0, width],
+      domain: extent(cityTemperature, selectDate) 
+    })
+  }
+
+
+//assumes that Austin is going to have highest temp, but ideally you get max of all
+  temperatureSFScale() {
+    return scaleLinear({
+      range: [height, 0],
+      domain: [0, max(cityTemperature, selectTemperature_SF)]
+    })
+  }
+
+  testScales(data, selector, scale, title) {
+    console.log('------------------------------')
+    console.log('------------------------------')
+    console.log('title - ', title)
+    console.log('domain - ', scale().domain())
+    console.log('range - ', scale().range())
+    console.log('-')
+    console.log('-')
+    for (let i=100; i<110; i++) {
+      let datum = data[i],
+      selected = selector(datum),
+      scaled = scale()(selected)
+
+     
+      console.log('datum - ', datum)
+      console.log('selected - ', selected)
+      console.log('scaled - ', scaled)
+      console.log('-')
+    }
+    console.log('------------------------------')
+    console.log('------------------------------')
+  }
+
+
+
 
 
 
@@ -89,6 +162,7 @@ class VxGraphs extends Component {
 
   // logic to decide whic data point is relevant based on the mouse position
   // and where to show the tooltip <div>
+  // can I higlight the bar?
   handleTooltip(data, event){
 
     const { showTooltip } = this.props;
@@ -110,40 +184,145 @@ class VxGraphs extends Component {
   /* ------- Rendering Helpers ------- */
 
   renderEventListener() {
-    let {data, hideTooltip}  = this.props
 
-    return (            
-      <Bar
-        x={0}
-        y={0}
-        width={width}
-        height={height}
-        fill="transparent"
-        data={data}
-        onMouseMove={event => {
-          this.handleTooltip(data, event)
-        }}
-        onMouseLeave={() => {hideTooltip()}}
-      />
+    console.log('rendering event listener')
+
+    let {data, hideTooltip}  = this.props
+    return (
+        <Bar
+          x={0}
+          y={0}
+          width={width}
+          height={height}
+          fill="transparent"
+          data={data.slice(10)}
+          // onTouchStart={data => event =>
+          //   this.handleDrag({
+          //     event,
+          //     data,
+          //     xSelector,
+          //     xScale,
+          //   })}
+          // onTouchMove={data => event =>
+          //   this.handleDrag({
+          //     event,
+          //     data,
+          //     xSelector,
+          //     xScale,
+          //   })}
+          onMouseMove={event => 
+            this.handleDrag(
+              event,
+              data,
+              selectDate,
+              dateScale,
+            )
+          }
+          onTouchEnd={data => event => this.finishDrag()}
+          onMouseLeave={data => event => this.finishDrag()}
+        />
+    )
+    // return (            
+    //   <Bar
+    //     x={0}
+    //     y={0}
+    //     width={width}
+    //     height={height}
+    //     fill="transparent"
+    //     data={data}
+    //     onMouseMove={event => {
+    //       this.handleTooltip(data, event)
+    //     }}
+    //     onMouseLeave={() => {hideTooltip()}}
+    //   />
+    // )
+  }
+
+  handleDrag(event, data, selector, scale) {
+
+    console.log(selector)
+
+    console.log(selectDate)
+    console.log(this.dateScale)
+    // generic
+    console.log('drag')
+    const {x} = localPoint(event)
+    const aproxData = scale.invert(x)
+    let index = bisector(selector).left(data, aproxData, 1)
+    const d0 = data[index-1]
+    const d1 = data[index]
+    let selectedData = d0
+
+    if (d1 && selector(d1)) {
+      if (aproxData - selector(d0) < aproxData - selector(d1)) {
+        selectedData = d0
+        index = index-1
+      } else {
+        selectedData = d1
+      }
+    }
+
+    // specific
+    // this could be moved into a save function callback
+    console.log(selectedData)
+    this.setState({
+      position: {
+        index, 
+        x: scale(selector(selectedData))
+      }
+    })
+  }
+
+  finishDrag() {
+    console.log('finishing drag')
+    this.setState({
+      position: null
+    })
+  }
+
+
+
+
+
+  drawLineGraph() {
+    // this.testScales(cityTemperature, selectDate, this.dateScale, 'date tests')
+
+    return (
+      <div className='graph-container'>
+        <svg width={width} height={height}>
+          <rect x={0} y={0} width={width} height={height} fill={backgroundColor} rx={14}/>
+          <LinePath
+            data={cityTemperature.slice(10)}
+            x={d => this.dateScale()(selectDate(d))}
+            y={d => this.temperatureSFScale()(selectTemperature_SF(d))}
+            strokeWidth={2}
+            stroke={color1}
+          />
+          
+          {this.renderEventListener(this.handleDrag, this.finishDrag)}
+
+          </svg>
+      </div>
     )
   }
 
+
+
+
   drawBarGraph() {
     let {data, tooltipData}  = this.props
-
     return (
       <div>
         <svg width={width} height={height}>
           <rect x={0} y={0} width={width} height={height} fill={backgroundColor} />
           <Group>
             {data.map((d, i) => {
-
-              const id = getID(d),
+              const id = getCountry(d),
                     barWidth = this.getNumStrokesScaleX().bandwidth(),
-                    barHeight = this.getNumStrokesScaleY()(getNumStrokes(d)),
+                    barHeight = this.getNumStrokesScaleY()(getNumDrawings(d)),
                     barX = this.getNumStrokesScaleX()(id),
                     barY = height - barHeight,
-                    color = this.scaleForColors()(getID(d))
+                    color = this.scaleForColors()(getCountry(d))
 
               return (
                 <Bar
@@ -169,8 +348,12 @@ class VxGraphs extends Component {
   }
 
   drawTooltip() {
-    let {tooltipData, tooltipTop, tooltipLeft }  = this.props
-    
+    let {tooltipData, tooltipTop, tooltipLeft, drawings }  = this.props
+    let shape = drawings.find((d) => {
+      if (tooltipData.key_ids[0] === d.key_id) {
+        return d
+      }
+    })
     return (
           <Tooltip
             top={tooltipTop}
@@ -181,16 +364,13 @@ class VxGraphs extends Component {
             }}
           >
           <div className='tooltip-container'>
-            {this.drawShape(tooltipData)}
-            {'numStrokes = ' + getNumStrokes(tooltipData)}
+            {this.drawShape(shape)}
+            {'Country = ' + getCountry(shape) +'\n'}
+            {'numStrokes = ' + getNumStrokes(shape)}
           </div>
           </Tooltip>
     )
   }
-
-
-
-
 
   drawShape(shape) {
     let width = 265,
@@ -230,22 +410,8 @@ class VxGraphs extends Component {
   render() {
     return (
       <div>
-
-      {this.props.data ?
-        this.drawBarGraph()
-        :
-        ''
-      }
-
-
-
-      {this.props.data.map(item => (
-        <div key={item.timestamp}>
-        {
-          //this.drawShape(item)
-        }
-        </div>
-      ))}
+      {/* {this.props.data && this.drawBarGraph()} */}
+      {this.drawLineGraph()}
       </div> 
     
     )

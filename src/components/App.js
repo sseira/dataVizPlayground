@@ -5,7 +5,8 @@ import * as Utility from './Utility.js'
 import ndjsonStream from 'can-ndjson-stream'
 import VxGraphs from './VxGraphs';
 import NivoGraphs from './NivoGraphs';
-
+import SemioticGraphs from './SemioticGraphs'
+import TestVX from './testVX';
 
 
 // import ExampleSVG from '../assets/images/InfoIcon.svg'
@@ -26,6 +27,7 @@ class App extends Component {
 
     this.state = {
       data: [],
+      dataByCountry: []
     };
   }
 
@@ -37,28 +39,48 @@ class App extends Component {
 
     // aggregate data here 
 
+    let {dataByCountry} = this.state
 
+    let found = dataByCountry.find((d) => {
+      if (new_item.countrycode === d.countrycode) {
+        d.key_ids = d.key_ids.concat(new_item.key_id)
+        return true
+      } 
+    })
+
+    if (!found) {
+      dataByCountry.push({
+        countrycode: new_item.countrycode, 
+        key_ids:[new_item.key_id]
+      })
+    }
     this.setState(state => {
       const data = state.data.concat(new_item)
       return {
-        data
+        data,
+        dataByCountry
       }
     })
   }
 
 
   render() {
-
+    const {dataByCountry, data} = this.state
     return (
       <div>
         <VxGraphs
-          data={this.state.data}
+          data={dataByCountry}
+          drawings={data}
         />
 
-        <NivoGraphs
-          data={this.state.data}
+        {/* <TestVX/> */}
+        {/* <NivoGraphs
+          data={dataByCountry}
         />
 
+        <SemioticGraphs
+          data={dataByCountry}
+        />  */}
       </div>
     )
   }

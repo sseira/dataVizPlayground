@@ -2,19 +2,21 @@ import { ResponsiveBar } from '@nivo/bar'
 import React, { Component } from 'react'
 
 
+
+
+
+const indexFunc = (d) => d.countrycode
+
+
 class NivoGraphs extends Component {
-
-
-
 
     /* ------- Processing data ------- */
 
-    addNumStrokesToData() {
+    addNumDrawingsToData() {
         let {data} = this.props
-
         let new_data = data.map((d,i) => {
             let new_d = d
-            new_d['numStrokes'] = d.drawing.length
+            new_d['numDrawings'] = d.key_ids.length
             return new_d
         })
 
@@ -22,16 +24,16 @@ class NivoGraphs extends Component {
     }
 
 
+
     /* ------- All in one rendering ------- */
 
     renderBarGraph() {
-        let data = this.addNumStrokesToData() 
-
+        let data = this.addNumDrawingsToData() 
         return (
             <ResponsiveBar
                 data={data}
-                keys={['numStrokes']}
-                indexBy={(d) => {return d.key_id}}
+                keys={['numDrawings']}
+                indexBy={indexFunc}
                 margin={{ top: 50, right: 130, bottom: 50, left: 60 }}
                 padding={0.3}
                 colors={{ scheme: 'nivo' }}
@@ -42,7 +44,7 @@ class NivoGraphs extends Component {
                     tickSize: 5,
                     tickPadding: 5,
                     tickRotation: 0,
-                    legend: 'key_id',
+                    legend: 'country',
                     legendPosition: 'middle',
                     legendOffset: 32
                 }}
@@ -50,7 +52,7 @@ class NivoGraphs extends Component {
                     tickSize: 5,
                     tickPadding: 5,
                     tickRotation: 0,
-                    legend: 'numStrokes',
+                    legend: 'numDrawings',
                     legendPosition: 'middle',
                     legendOffset: -40
                 }}

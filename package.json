@@ -15,6 +15,7 @@
     "@vx/curve": "0.0.189",
     "@vx/event": "0.0.189",
     "@vx/group": "0.0.190",
+    "@vx/mock-data": "0.0.189",
     "@vx/scale": "0.0.190",
     "@vx/shape": "0.0.190",
     "@vx/tooltip": "0.0.189",
@@ -39,6 +40,7 @@
     "react-beautiful-dnd": "^10.0.4",
     "react-dom": "^16.8.2",
     "sass-loader": "^7.1.0",
+    "semiotic": "1.20.2",
     "style-loader": "^0.23.1",
     "webpack": "^4.29.5",
     "whatwg-fetch": "^3.0.0"
