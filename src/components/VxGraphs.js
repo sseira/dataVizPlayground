@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 
 import { curveNatural } from '@vx/curve'
-import { LinePath, Bar } from '@vx/shape'
+import { LinePath, Bar, Line } from '@vx/shape'
 import { scaleLinear, scaleBand, scaleOrdinal, scaleTime } from '@vx/scale'
 import { Group } from '@vx/group';
 import { withTooltip, Tooltip } from "@vx/tooltip";
@@ -24,7 +24,10 @@ const backgroundColor = "#32deaa",
       xMax = width - padding,
       yMax = height - padding,
       color1 = 'black',
-      color2 = 'gray'
+      color2 = 'gray',
+      data = cityTemperature.slice(0,100)
+
+
 
 
 
@@ -34,7 +37,14 @@ const getNumStrokes = d => d.drawing.length,
       getID = d => d.key_id,
       getCountry = d =>d.countrycode,
       getNumDrawings = d => d.key_ids.length,
-      selectDate = d => new Date(d.date.slice(0,4),d.date.slice(4,6),d.date.slice(6,8)), 
+      selectDate = (d) => {
+        if (d) {
+          return new Date(d.date.slice(0,4),d.date.slice(4,6),d.date.slice(6,8))
+        } else {
+          console.log(d)
+          return null
+        }
+      }, 
       selectTemperature_NY = d => d['New York'],
       selectTemperature_SF = d => d['San Francisco'],
       selectTemperature_AU = d => d.close //['Austin']
@@ -46,8 +56,13 @@ const getNumStrokes = d => d.drawing.length,
 /* ------ Global Scales ??? ------- */
 const dateScale = scaleTime({
     range: [0, width],
-    domain: extent(cityTemperature, selectDate) 
+    domain: extent(data, selectDate) 
   })
+
+/* ---------------------------------------------------- */
+/* ---------------------------------------------------- */
+// Component BEGINS
+/* ---------------------------------------------------- */
 
 
 class VxGraphs extends Component {
@@ -117,16 +132,14 @@ class VxGraphs extends Component {
   dateScale(){
     return scaleTime({
       range: [0, width],
-      domain: extent(cityTemperature, selectDate) 
+      domain: extent(data, selectDate) 
     })
   }
 
-
-//assumes that Austin is going to have highest temp, but ideally you get max of all
   temperatureSFScale() {
     return scaleLinear({
       range: [height, 0],
-      domain: [0, max(cityTemperature, selectTemperature_SF)]
+      domain: [0, max(data, selectTemperature_SF)]
     })
   }
 
@@ -180,72 +193,9 @@ class VxGraphs extends Component {
     });
   };
 
-
-  /* ------- Rendering Helpers ------- */
-
-  renderEventListener() {
-
-    console.log('rendering event listener')
-
-    let {data, hideTooltip}  = this.props
-    return (
-        <Bar
-          x={0}
-          y={0}
-          width={width}
-          height={height}
-          fill="transparent"
-          data={data.slice(10)}
-          // onTouchStart={data => event =>
-          //   this.handleDrag({
-          //     event,
-          //     data,
-          //     xSelector,
-          //     xScale,
-          //   })}
-          // onTouchMove={data => event =>
-          //   this.handleDrag({
-          //     event,
-          //     data,
-          //     xSelector,
-          //     xScale,
-          //   })}
-          onMouseMove={event => 
-            this.handleDrag(
-              event,
-              data,
-              selectDate,
-              dateScale,
-            )
-          }
-          onTouchEnd={data => event => this.finishDrag()}
-          onMouseLeave={data => event => this.finishDrag()}
-        />
-    )
-    // return (            
-    //   <Bar
-    //     x={0}
-    //     y={0}
-    //     width={width}
-    //     height={height}
-    //     fill="transparent"
-    //     data={data}
-    //     onMouseMove={event => {
-    //       this.handleTooltip(data, event)
-    //     }}
-    //     onMouseLeave={() => {hideTooltip()}}
-    //   />
-    // )
-  }
-
   handleDrag(event, data, selector, scale) {
-
-    console.log(selector)
-
-    console.log(selectDate)
-    console.log(this.dateScale)
     // generic
-    console.log('drag')
+    
     const {x} = localPoint(event)
     const aproxData = scale.invert(x)
     let index = bisector(selector).left(data, aproxData, 1)
@@ -264,20 +214,62 @@ class VxGraphs extends Component {
 
     // specific
     // this could be moved into a save function callback
-    console.log(selectedData)
     this.setState({
       position: {
-        index, 
+        index, //of data 
         x: scale(selector(selectedData))
       }
     })
   }
 
   finishDrag() {
-    console.log('finishing drag')
     this.setState({
       position: null
     })
+  }
+
+
+
+
+
+  /* ------- Rendering Helpers ------- */
+
+  renderEventListener() {
+    // let {data, hideTooltip}  = this.props
+    return (
+        <Bar
+          x={0}
+          y={0}
+          width={width}
+          height={height}
+          fill="transparent"
+          data={data}
+          onTouchStart={event => 
+            this.handleDrag(
+              event,
+              data,
+              selectDate,
+              dateScale,
+            )}
+          onTouchMove={event => 
+            this.handleDrag(
+              event,
+              data,
+              selectDate,
+              dateScale,
+            )}
+          onMouseMove={event => 
+            this.handleDrag(
+              event,
+              data,
+              selectDate,
+              dateScale,
+            )
+          }
+          onTouchEnd={data => event => this.finishDrag()}
+          onMouseLeave={data => event => this.finishDrag()}
+        />
+    )
   }
 
 
@@ -292,7 +284,7 @@ class VxGraphs extends Component {
         <svg width={width} height={height}>
           <rect x={0} y={0} width={width} height={height} fill={backgroundColor} rx={14}/>
           <LinePath
-            data={cityTemperature.slice(10)}
+            data={data}
             x={d => this.dateScale()(selectDate(d))}
             y={d => this.temperatureSFScale()(selectTemperature_SF(d))}
             strokeWidth={2}
@@ -301,6 +293,13 @@ class VxGraphs extends Component {
           
           {this.renderEventListener(this.handleDrag, this.finishDrag)}
 
+          {this.state && this.state.position && 
+            <Line
+              from={{x:this.state.position.x, y: 0}}
+              to={{x:this.state.position.x, y: height}}
+              stroke={color1}
+            />
+          }
           </svg>
       </div>
     )

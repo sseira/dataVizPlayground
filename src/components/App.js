@@ -69,11 +69,11 @@ class App extends Component {
     return (
       <div>
         <VxGraphs
-          data={dataByCountry}
-          drawings={data}
+          // data={dataByCountry}
+          // drawings={data}
         />
 
-        {/* <TestVX/> */}
+        <TestVX/>
         {/* <NivoGraphs
           data={dataByCountry}
         />

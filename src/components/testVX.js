@@ -65,24 +65,35 @@ class TestVX extends Component {
       domain: [0, yMax + (yMax / 4)],
     });
 
+    const handleChange = (data) => (event) => {
+        this.handleDrag({
+            event,
+            data,
+            xSelector,
+            xScale,
+            yScale,
+          })
+    }
+
+    const handleEnd = () => {
+        this.setState({ position: null })
+    }
+
     return (
       <svg width={width} height={height}>
         <rect x={0} y={0} width={width} height={height} fill="#32deaa" rx={14} />
         <LinePath
           data={position ? stock.slice(0, position.index) : stock}
-          xScale={xScale}
-          yScale={yScale}
-          x={xSelector}
-          y={ySelector}
+          x={d => xScale(xSelector(d))}
+          y={d => yScale(ySelector(d))}
           strokeWidth={2}
+          stroke="rgba(255,255,255,1)"
         />
         {position && (
           <LinePath
             data={stock.slice(position.index)}
-            xScale={xScale}
-            yScale={yScale}
-            x={xSelector}
-            y={ySelector}
+            x={d => xScale(xSelector(d))}
+            y={d => yScale(ySelector(d))}
             strokeWidth={2}
             stroke="rgba(255,255,255,.5)"
           />
@@ -93,6 +104,7 @@ class TestVX extends Component {
             from={{ x: position.x, y: 0 }}
             to={{ x: position.x, y: height }}
             strokeWidth={1}
+            stroke={'black'}
           />
         )}
         <Bar
@@ -103,32 +115,11 @@ class TestVX extends Component {
           fill="transparent"
           rx={14}
           data={stock}
-          onTouchStart={data => event =>
-            this.handleDrag({
-              event,
-              data,
-              xSelector,
-              xScale,
-              yScale,
-            })}
-          onTouchMove={data => event =>
-            this.handleDrag({
-              event,
-              data,
-              xSelector,
-              xScale,
-              yScale,
-            })}
-          onMouseMove={data => event =>
-            this.handleDrag({
-              event,
-              data,
-              xSelector,
-              xScale,
-              yScale,
-            })}
-          onTouchEnd={data => event => this.setState({ position: null })}
-          onMouseLeave={data => event => this.setState({ position: null })}
+          onTouchStart={handleChange(stock)}
+          onTouchMove={handleChange(stock)}
+          onMouseMove={handleChange(stock)}
+          onTouchEnd={handleEnd}
+          onMouseLeave={handleEnd}
         />
       </svg>
     );
