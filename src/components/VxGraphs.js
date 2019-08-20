@@ -20,7 +20,7 @@ import { max, extent, bisector } from 'd3-array'
 const backgroundColor = "#32deaa",
       width = 600,
       height = 400,
-      padding = 20,
+      padding = 50,
       xMax = width - padding,
       yMax = height - padding,
       color1 = 'black',
@@ -32,11 +32,10 @@ const backgroundColor = "#32deaa",
 
 
 /* ------- Data Accessors ------- */
-//should be their own functions 
-const getNumStrokes = d => d.drawing.length,
-      getID = d => d.key_id,
-      getCountry = d =>d.countrycode,
-      getNumDrawings = d => d.key_ids.length,
+const selectNumStrokes = d => d.drawing.length,
+      selectID = d => d.key_id,
+      selectCountry = d =>d.countrycode,
+      selectNumDrawings = d => d.key_ids.length,
       selectDate = (d) => {
         if (d) {
           return new Date(d.date.slice(0,4),d.date.slice(4,6),d.date.slice(6,8))
@@ -53,11 +52,47 @@ const getNumStrokes = d => d.drawing.length,
     
 
 
-/* ------ Global Scales ??? ------- */
+/* ------ Scales ------- */
+
 const dateScale = scaleTime({
-    range: [0, width],
-    domain: extent(data, selectDate) 
-  })
+  range: [padding, xMax],
+  domain: extent(data, selectDate) 
+})
+
+const temperatureSFScale = scaleLinear({
+  range: [yMax, padding],
+  domain: [0, max(data, selectTemperature_SF)]
+})
+
+// const getYScale = scaleLinear({
+//   range: [0, yMax],
+//   domain: [0, max(data, selectNumDrawings)]
+// })
+
+// const getXScale = scaleLinear({
+//   range: [0, xMax],
+//   domain: [0, max(data, selectCountry)]
+// })
+
+// const getNumStrokesScaleX = scaleBand({
+//   range: [0,xMax], 
+//   domain: data.map(selectCountry),
+//   padding: 0.4
+// })
+
+// const scaleForColors = scaleOrdinal({
+//   range: schemeSet1, 
+//   domain: data.map(selectCountry)
+// })
+
+// const getNumStrokesScaleY = scaleLinear({
+//   range: [0, yMax],
+//   domain: [0, max(data, selectNumDrawings)]
+// })
+
+
+
+
 
 /* ---------------------------------------------------- */
 /* ---------------------------------------------------- */
@@ -71,6 +106,10 @@ class VxGraphs extends Component {
     super(props);
     this.handleDrag = this.handleDrag.bind(this);
     this.finishDrag = this.finishDrag.bind(this);
+
+    this.state = {
+      position: null,
+  };
   }
 
 
@@ -92,56 +131,9 @@ class VxGraphs extends Component {
 
   /* ------- Scales ------- */
   //rename
-  getYScale(data, y, yMax) {
-    return scaleLinear({
-      range: [0, yMax],
-      domain: [0, max(data, y)]
-    })
-  }
 
-  getXScale(data, x, xMax){
-    return scaleLinear({
-      range: [0, xMax],
-      domain: [0, max(data, x)]
-    })
-  }
 
-  getNumStrokesScaleX() {
-    return scaleBand({
-      range: [0,xMax], 
-      domain: this.props.data.map(getCountry),
-      padding: 0.4
-    })
-  }
 
-  scaleForColors() {
-    let domain = this.props.data.map(getCountry)
-    return scaleOrdinal({
-      range: schemeSet1, 
-      domain: domain
-    })
-  }
-
-  getNumStrokesScaleY(){
-    return scaleLinear({
-      range: [0, yMax],
-      domain: [0, max(this.props.data, getNumDrawings)]
-    })
-  }
-
-  dateScale(){
-    return scaleTime({
-      range: [0, width],
-      domain: extent(data, selectDate) 
-    })
-  }
-
-  temperatureSFScale() {
-    return scaleLinear({
-      range: [height, 0],
-      domain: [0, max(data, selectTemperature_SF)]
-    })
-  }
 
   testScales(data, selector, scale, title) {
     console.log('------------------------------')
@@ -234,7 +226,7 @@ class VxGraphs extends Component {
 
   /* ------- Rendering Helpers ------- */
 
-  renderEventListener() {
+  renderEventListener(dateScale) {
     // let {data, hideTooltip}  = this.props
     return (
         <Bar
@@ -278,22 +270,31 @@ class VxGraphs extends Component {
 
   drawLineGraph() {
     // this.testScales(cityTemperature, selectDate, this.dateScale, 'date tests')
-
+    const {position} = this.state
     return (
       <div className='graph-container'>
         <svg width={width} height={height}>
           <rect x={0} y={0} width={width} height={height} fill={backgroundColor} rx={14}/>
           <LinePath
-            data={data}
-            x={d => this.dateScale()(selectDate(d))}
-            y={d => this.temperatureSFScale()(selectTemperature_SF(d))}
+            data={position ? data.slice(0, position.index+1) : data}
+            x={d => dateScale(selectDate(d))}
+            y={d => temperatureSFScale(selectTemperature_SF(d))}
             strokeWidth={2}
             stroke={color1}
           />
-          
-          {this.renderEventListener(this.handleDrag, this.finishDrag)}
+          {position &&
+            <LinePath
+              data={data.slice(position.index)}
+              x={d => dateScale(selectDate(d))}
+              y={d => temperatureSFScale(selectTemperature_SF(d))}
+              strokeWidth={2}
+              stroke={color2}
+            />
+          }
+        
+          {this.renderEventListener(dateScale)}
 
-          {this.state && this.state.position && 
+          {position && 
             <Line
               from={{x:this.state.position.x, y: 0}}
               to={{x:this.state.position.x, y: height}}
@@ -304,8 +305,6 @@ class VxGraphs extends Component {
       </div>
     )
   }
-
-
 
 
   drawBarGraph() {
