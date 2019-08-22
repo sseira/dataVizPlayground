@@ -180,7 +180,7 @@ class VxGraphs extends Component {
   handleTooltip(data, event){
 
     const { showTooltip } = this.props;
-    const { x, y } = localPoint(event);
+    const { x } = localPoint(event);
     var eachBand = this.getNumStrokesScaleX().step(),
         index = Math.floor((x / eachBand)),
         d = data[index]
@@ -195,10 +195,19 @@ class VxGraphs extends Component {
   };
 
   handleDrag(event, data, selector, scale, zoom) {
-    // generic
-    
+    zoom.dragMove(event)
+
+    const rescaleX = (scale, zoom) => {
+      let newRange = scale.range().map((r) => {
+        return r*zoom.transformMatrix.scaleX + zoom.transformMatrix.translateX
+      })
+      return scale.copy().range(newRange)
+    }
+
+
     const {x} = localPoint(event)
-    const aproxData = scale.invert(x)
+    const zoomedXScale = rescaleX(scale, zoom)
+    const aproxData = zoomedXScale.invert(x)
     let index = bisector(selector).left(data, aproxData, 1)
     const d0 = data[index-1]
     const d1 = data[index]
@@ -213,8 +222,6 @@ class VxGraphs extends Component {
       }
     }
 
-    // specific
-    // this could be moved into a save function callback
     this.setState({
       position: {
         index, //of data 
@@ -222,7 +229,6 @@ class VxGraphs extends Component {
       }
     })
 
-    zoom.dragMove(event)
   }
 
   finishDrag() {
@@ -280,7 +286,7 @@ class VxGraphs extends Component {
 
 
 
-
+// zoom is not playing nice with the Line position.x
 
   drawLineGraph() {
     // this.testScales(cityTemperature, selectDate, this.dateScale, 'date tests')
@@ -293,7 +299,7 @@ class VxGraphs extends Component {
         scaleXMax={4}
         scaleYMin={1 / 2}
         scaleYMax={4}
-        transformMatrix={initialTransform}
+        // transformMatrix={initialTransform}
       >
         {zoom => {
           return (
