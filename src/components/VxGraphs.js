@@ -7,6 +7,7 @@ import { Group } from '@vx/group';
 import { withTooltip, Tooltip } from "@vx/tooltip";
 import { localPoint } from "@vx/event";
 import { Zoom } from '@vx/zoom';
+import { RectClipPath } from '@vx/clip-path';
 
 
 import { cityTemperature, appleStock } from "@vx/mock-data";
@@ -176,23 +177,24 @@ class VxGraphs extends Component {
 
   // logic to decide whic data point is relevant based on the mouse position
   // and where to show the tooltip <div>
-  // can I higlight the bar?
-  handleTooltip(data, event){
 
-    const { showTooltip } = this.props;
-    const { x } = localPoint(event);
-    var eachBand = this.getNumStrokesScaleX().step(),
-        index = Math.floor((x / eachBand)),
-        d = data[index]
 
-    if(!d) return
+  // handleTooltip(data, event){
 
-    showTooltip({
-      tooltipData: d,
-      tooltipLeft: xMax, //this.getNumStrokesScaleX()(getID(d)),
-      tooltipTop: 0 //height - this.getNumStrokesScaleY()(getNumStrokes(d)),
-    });
-  };
+  //   const { showTooltip } = this.props;
+  //   const { x } = localPoint(event);
+  //   var eachBand = this.getNumStrokesScaleX().step(),
+  //       index = Math.floor((x / eachBand)),
+  //       d = data[index]
+
+  //   if(!d) return
+
+  //   showTooltip({
+  //     tooltipData: d,
+  //     tooltipLeft: xMax, //this.getNumStrokesScaleX()(getID(d)),
+  //     tooltipTop: 0 //height - this.getNumStrokesScaleY()(getNumStrokes(d)),
+  //   });
+  // };
 
   handleDrag(event, data, selector, scale, zoom) {
     zoom.dragMove(event)
@@ -238,7 +240,6 @@ class VxGraphs extends Component {
       return
     }
 
-    console.log(x, y)
     this.setState({
       position: null
     })
@@ -284,9 +285,83 @@ class VxGraphs extends Component {
     )
   }
 
+  renderZoomMap(zoom) {
+    const mapScale = .25,
+          padding = 60,
+          {position} = this.state
+
+    return (
+      <g>
+        <RectClipPath id="zoom-clip" width={width} height={height} />
+
+        <g
+          clipPath="url(#zoom-clip)"
+          transform={`
+            scale(${mapScale})
+            translate(${width/mapScale - width - padding}, ${height/mapScale - height - padding})
+          `}
+        >
+          <rect width={width} height={height} fill="#7ffad5" />
+
+          {this.renderLinePath()}
+          {this.renderMouseLine()}
+
+          <rect
+            width={width}
+            height={height}
+            fill="white"
+            fillOpacity={0.2}
+            stroke="white"
+            strokeWidth={4}
+            transform={zoom.toStringInvert()}
+          />
+
+        </g>
+      </g>
+    )
+  }
+
+  renderLinePath() {
+    const {position} = this.state
+
+    return (
+      <g>
+        <LinePath
+          data={position ? data.slice(0, position.index+1) : data}
+          x={d => dateScale(selectDate(d))}
+          y={d => temperatureSFScale(selectTemperature_SF(d))}
+          strokeWidth={2}
+          stroke={color1}
+        />
+        {position &&
+          <LinePath
+            data={data.slice(position.index)}
+            x={d => dateScale(selectDate(d))}
+            y={d => temperatureSFScale(selectTemperature_SF(d))}
+            strokeWidth={2}
+            stroke={color2}
+          />
+        }
+      </g>
+    )
+  }
+
+  renderMouseLine() {
+    const {position} = this.state
+    if (position) {
+      return (
+        <Line
+          from={{x:position.x, y: 0}}
+          to={{x:position.x, y: height}}
+          stroke={color1}
+        />
+      )
+    } else {
+      return null
+    }
+  }
 
 
-// zoom is not playing nice with the Line position.x
 
   drawLineGraph() {
     // this.testScales(cityTemperature, selectDate, this.dateScale, 'date tests')
@@ -304,37 +379,21 @@ class VxGraphs extends Component {
         {zoom => {
           return (
             <div className='graph-container'>
-              <svg width={width} height={height}>
+              <svg 
+                width={width} 
+                height={height}
+                style={{ cursor: zoom.isDragging ? 'grabbing' : 'grab' }}
+                >
                 <rect x={0} y={0} width={width} height={height} fill={backgroundColor} rx={14}/>
                 <g transform={zoom.toString()}>
 
-                  <LinePath
-                    data={position ? data.slice(0, position.index+1) : data}
-                    x={d => dateScale(selectDate(d))}
-                    y={d => temperatureSFScale(selectTemperature_SF(d))}
-                    strokeWidth={2}
-                    stroke={color1}
-                  />
-                  {position &&
-                    <LinePath
-                      data={data.slice(position.index)}
-                      x={d => dateScale(selectDate(d))}
-                      y={d => temperatureSFScale(selectTemperature_SF(d))}
-                      strokeWidth={2}
-                      stroke={color2}
-                    />
-                  }
-                
+                  {this.renderLinePath()}
+                  {this.renderMouseLine()}
                   {this.renderEventListener(dateScale, zoom)}
-
-                  {position && 
-                    <Line
-                      from={{x:this.state.position.x, y: 0}}
-                      to={{x:this.state.position.x, y: height}}
-                      stroke={color1}
-                    />
-                  }
                 </g>
+
+                {this.renderZoomMap(zoom)}
+
                 </svg>
                 <button className="btn btn-lg" onClick={zoom.reset}>
                   Reset

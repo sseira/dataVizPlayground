@@ -73,10 +73,10 @@ class App extends Component {
           // drawings={data}
         />
 
-        <TestVX
+        {/* <TestVX
           width={400}
           height={400}
-        />
+        /> */}
         {/* <NivoGraphs
           data={dataByCountry}
         />

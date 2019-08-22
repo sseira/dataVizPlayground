@@ -64,17 +64,16 @@ class TestVX extends React.Component {
                 height={height}
                 style={{ cursor: zoom.isDragging ? 'grabbing' : 'grab' }}
               >
-                  <RectClipPath id="zoom-clip" width={width} height={height} />
                 <rect width={width} height={height} rx={14} fill={bg} />
                 <g transform={zoom.toString()}>
 
-                <Bar
-                  x={10}
-                  y={10}
-                  width={20}
-                  height={100}
-                  fill={'green'}
-                />
+                  <Bar
+                    x={10}
+                    y={10}
+                    width={20}
+                    height={100}
+                    fill={'green'}
+                  />
 
                   {/* {phyllotaxis.map((point, i) => {
                     return (
@@ -110,6 +109,8 @@ class TestVX extends React.Component {
                     zoom.scale({ scaleX: 1.1, scaleY: 1.1, point });
                   }}
                 />
+                <RectClipPath id="zoom-clip" width={width} height={height} />
+
                 {showMiniMap && (
                   <g
                     clipPath="url(#zoom-clip)"
