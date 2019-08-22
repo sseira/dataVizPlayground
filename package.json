@@ -12,6 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "@nivo/bar": "^0.59.2",
+    "@vx/clip-path": "0.0.189",
     "@vx/curve": "0.0.189",
     "@vx/event": "0.0.189",
     "@vx/group": "0.0.190",
@@ -19,6 +20,7 @@
     "@vx/scale": "0.0.190",
     "@vx/shape": "0.0.190",
     "@vx/tooltip": "0.0.189",
+    "@vx/zoom": "0.0.189",
     "babel-core": "^6.26.3",
     "babel-preset-es2015": "^6.24.1",
     "babel-preset-react": "^6.24.1",

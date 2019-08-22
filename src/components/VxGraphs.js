@@ -6,7 +6,7 @@ import { scaleLinear, scaleBand, scaleOrdinal, scaleTime } from '@vx/scale'
 import { Group } from '@vx/group';
 import { withTooltip, Tooltip } from "@vx/tooltip";
 import { localPoint } from "@vx/event";
-
+import { Zoom } from '@vx/zoom';
 
 
 import { cityTemperature, appleStock } from "@vx/mock-data";
@@ -14,6 +14,7 @@ import { cityTemperature, appleStock } from "@vx/mock-data";
 
 import { schemeSet1 } from 'd3-scale-chromatic';
 import { max, extent, bisector } from 'd3-array'
+import { formatWithOptions } from 'util';
 
 
 /* ------- Layout Constants ------- */
@@ -29,6 +30,14 @@ const backgroundColor = "#32deaa",
 
 
 
+const initialTransform = {
+      scaleX: 1.27,
+      scaleY: 1.27,
+      translateX: -211.62,
+      translateY: 162.59,
+      skewX: 0,
+      skewY: 0
+    };
 
 
 /* ------- Data Accessors ------- */
@@ -107,6 +116,7 @@ class VxGraphs extends Component {
     this.handleDrag = this.handleDrag.bind(this);
     this.finishDrag = this.finishDrag.bind(this);
 
+    console.log('constructor')
     this.state = {
       position: null,
   };
@@ -148,7 +158,6 @@ class VxGraphs extends Component {
       selected = selector(datum),
       scaled = scale()(selected)
 
-     
       console.log('datum - ', datum)
       console.log('selected - ', selected)
       console.log('scaled - ', scaled)
@@ -185,7 +194,7 @@ class VxGraphs extends Component {
     });
   };
 
-  handleDrag(event, data, selector, scale) {
+  handleDrag(event, data, selector, scale, zoom) {
     // generic
     
     const {x} = localPoint(event)
@@ -212,9 +221,18 @@ class VxGraphs extends Component {
         x: scale(selector(selectedData))
       }
     })
+
+    zoom.dragMove(event)
   }
 
   finishDrag() {
+    const {x,y} = localPoint(event)
+
+    if (x>0 && x<width && y>0 && y<height) {
+      return
+    }
+
+    console.log(x, y)
     this.setState({
       position: null
     })
@@ -226,7 +244,7 @@ class VxGraphs extends Component {
 
   /* ------- Rendering Helpers ------- */
 
-  renderEventListener(dateScale) {
+  renderEventListener(dateScale, zoom) {
     // let {data, hideTooltip}  = this.props
     return (
         <Bar
@@ -236,30 +254,26 @@ class VxGraphs extends Component {
           height={height}
           fill="transparent"
           data={data}
-          onTouchStart={event => 
-            this.handleDrag(
-              event,
-              data,
-              selectDate,
-              dateScale,
-            )}
-          onTouchMove={event => 
-            this.handleDrag(
-              event,
-              data,
-              selectDate,
-              dateScale,
-            )}
+          // onTouchStart={}
+          // onTouchMove={}
           onMouseMove={event => 
             this.handleDrag(
               event,
               data,
               selectDate,
               dateScale,
+              zoom
             )
           }
-          onTouchEnd={data => event => this.finishDrag()}
-          onMouseLeave={data => event => this.finishDrag()}
+          onMouseDown={zoom.dragStart}
+          onMouseUp={zoom.dragEnd}
+
+          onDoubleClick={event => {
+            const point = localPoint(event);
+            zoom.scale({ scaleX: 1.1, scaleY: 1.1, point });
+          }}
+          onTouchEnd={event => this.finishDrag(event)}
+          onMouseLeave={event => this.finishDrag(event)}
         />
     )
   }
@@ -272,37 +286,60 @@ class VxGraphs extends Component {
     // this.testScales(cityTemperature, selectDate, this.dateScale, 'date tests')
     const {position} = this.state
     return (
-      <div className='graph-container'>
-        <svg width={width} height={height}>
-          <rect x={0} y={0} width={width} height={height} fill={backgroundColor} rx={14}/>
-          <LinePath
-            data={position ? data.slice(0, position.index+1) : data}
-            x={d => dateScale(selectDate(d))}
-            y={d => temperatureSFScale(selectTemperature_SF(d))}
-            strokeWidth={2}
-            stroke={color1}
-          />
-          {position &&
-            <LinePath
-              data={data.slice(position.index)}
-              x={d => dateScale(selectDate(d))}
-              y={d => temperatureSFScale(selectTemperature_SF(d))}
-              strokeWidth={2}
-              stroke={color2}
-            />
-          }
-        
-          {this.renderEventListener(dateScale)}
+      <Zoom
+        width={width}
+        height={height}
+        scaleXMin={1 / 2}
+        scaleXMax={4}
+        scaleYMin={1 / 2}
+        scaleYMax={4}
+        transformMatrix={initialTransform}
+      >
+        {zoom => {
+          return (
+            <div className='graph-container'>
+              <svg width={width} height={height}>
+                <rect x={0} y={0} width={width} height={height} fill={backgroundColor} rx={14}/>
+                <g transform={zoom.toString()}>
 
-          {position && 
-            <Line
-              from={{x:this.state.position.x, y: 0}}
-              to={{x:this.state.position.x, y: height}}
-              stroke={color1}
-            />
-          }
-          </svg>
-      </div>
+                  <LinePath
+                    data={position ? data.slice(0, position.index+1) : data}
+                    x={d => dateScale(selectDate(d))}
+                    y={d => temperatureSFScale(selectTemperature_SF(d))}
+                    strokeWidth={2}
+                    stroke={color1}
+                  />
+                  {position &&
+                    <LinePath
+                      data={data.slice(position.index)}
+                      x={d => dateScale(selectDate(d))}
+                      y={d => temperatureSFScale(selectTemperature_SF(d))}
+                      strokeWidth={2}
+                      stroke={color2}
+                    />
+                  }
+                
+                  {this.renderEventListener(dateScale, zoom)}
+
+                  {position && 
+                    <Line
+                      from={{x:this.state.position.x, y: 0}}
+                      to={{x:this.state.position.x, y: height}}
+                      stroke={color1}
+                    />
+                  }
+                </g>
+                </svg>
+                <button className="btn btn-lg" onClick={zoom.reset}>
+                  Reset
+                </button>
+                <button className="btn btn-lg" onClick={zoom.clear}>
+                  Clear
+                </button>
+            </div>
+          )
+              }}
+      </Zoom>
     )
   }
 
