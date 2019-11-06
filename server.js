@@ -32,7 +32,7 @@ if(process.env.NODE_ENV !== 'production') {
 
 app.use(express.static(path.join(__dirname, 'dist')));
 
-app.get('/', function(request, response) {
+app.get('/*', function(request, response) {
   response.sendFile(__dirname + '/dist/index.html')
 });
 
@@ -56,24 +56,24 @@ app.listen(PORT, function(error) {
 
 /* --------------- Load Local JSON ---------------- */
 
-app.get('/getLocalData', function(request, response) {
-  var chunks = []
+// app.get('/getLocalData', function(request, response) {
+//   var chunks = []
 
-  fs.createReadStream('data/frog_small.ndjson')
-  .pipe(ndjson.parse())
-  .on('data', function(data) {
-    chunks.push(JSON.stringify(data))
-  })
-  .on('end', () => {
-    // not sure why we need the SetInterval...
-    const id = setInterval( () => {
-      if ( chunks.length ) {
-        response.write( chunks.shift() + "\n" );
-      } else {
-        clearInterval( id );
-        response.end();
-      }
-    }, 1000 );
-  })
+//   fs.createReadStream('data/frog_small.ndjson')
+//   .pipe(ndjson.parse())
+//   .on('data', function(data) {
+//     chunks.push(JSON.stringify(data))
+//   })
+//   .on('end', () => {
+//     // not sure why we need the SetInterval...
+//     const id = setInterval( () => {
+//       if ( chunks.length ) {
+//         response.write( chunks.shift() + "\n" );
+//       } else {
+//         clearInterval( id );
+//         response.end();
+//       }
+//     }, 1000 );
+//   })
 
-})
+// })

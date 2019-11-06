@@ -1,14 +1,31 @@
-/* --------------------- Fonts ------------------------ */
-/* --------------------- Fonts ------------------------ */
-@font-face {
-  font-family: 'GT America Standard';
-  font-weight: 100;
-  src: url('../fonts/GT-America-Standard-Thin.ttf') format('truetype'),
-    url('../fonts/GT-America-Standard-Thin.otf') format('otf');
+@import "../../assets/stylesheets/fonts";
+
+body,html,#root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  
+  font-family: 'Source Sans Pro', sans-serif;
+  font-weight: $regular;
+  font-size: 15px;
 }
 
+.app-container {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+}
 
-.graph-container {
-  height: 600px;
-  width: 500px;
+.page-view {
+  width: 100%;
+  padding: 48px;
+  box-sizing: border-box;
+}
+
+a:link {
+  text-decoration: none;
+}
+
+a:visited {
+  text-decoration: none;
 }
