@@ -1,0 +1,36 @@
+
+@import "../../assets/stylesheets/colors";
+
+// can we move these to base.scss?
+
+
+.sidebar-container {
+    width: 108px;
+    background-color: $black;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.sidebar-item {
+    height: 72px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    .sidebar-item-title {
+        color: $white;
+    }
+
+    &.active {
+        background-color: $selectedBlack;
+    }
+} 
+
+.sidebar-icon {
+    width: 20px;
+}

@@ -1,0 +1,70 @@
+@import url('https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700&display=swap');
+
+$light: 300;
+$regular: 400;
+$semibold: 600;
+$bold: 700;
+
+
+.page-title {
+    font-family: 'Source Sans Pro', sans-serif;
+    font-size: 40px;
+    font-weight: $regular;
+    margin-bottom: 48px;
+}
+
+.section-title {
+    font-family: 'Source Sans Pro', sans-serif;
+    font-weight: $semibold;
+    font-size: 24px;
+}
+
+.body-header {
+    font-family: 'Source Sans Pro', sans-serif;
+    font-weight: $semibold;
+    font-size: 15px;
+    padding-bottom: 16px;
+}
+
+.body-text {
+    font-family: 'Source Sans Pro', sans-serif;
+    font-weight: $regular;
+    font-size: 15px;
+}
+
+.big-number {
+    font-family: 'Source Sans Pro', sans-serif;
+    font-weight: $regular;
+    font-size: 24px;
+}
+
+.label {
+    font-family: 'Source Sans Pro', sans-serif;
+    font-weight: $regular;
+    font-size: 11px;
+    text-transform: uppercase;
+}
+
+.detail-text {
+    font-family: 'Source Sans Pro', sans-serif;
+    font-weight: $regular;
+    font-size: 12px;
+}
+
+
+
+
+
+
+
+
+
+
+// local font
+// @font-face {
+//   font-family: 'GT America Standard';
+//   font-weight: 100;
+//   src: url('../fonts/GT-America-Standard-Thin.ttf') format('truetype'),
+//     url('../fonts/GT-America-Standard-Thin.otf') format('otf');
+// }
+
