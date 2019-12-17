@@ -1,24 +1,17 @@
 import '../assets/stylesheets/base.scss'
 
 import React, { Component } from 'react'
-import * as Utility from './Utility.js'
-import ndjsonStream from 'can-ndjson-stream'
-import VxGraphs from './VxGraphs';
-import NivoGraphs from './NivoGraphs';
-import SemioticGraphs from './SemioticGraphs'
-import TestVX from './testVX';
+import {Switch, Route} from "react-router-dom";
+import GlobalSidebar from './GlobalSidebar/GlobalSidebar';
+import AllProjects from './AllProjects/AllProjects';
+import Project from './Project/Project';
 
-
-// import ExampleSVG from '../assets/images/InfoIcon.svg'
-//        <ExampleSVG className='' />
-
-// import ExampleJPG from '../assets/images/got.jpg';
-//        <img src={ExampleJPG} />
-
-// var MobileDetect = require('mobile-detect'),
-//   md = new MobileDetect(navigator.userAgent)
-//md.phone() ? do this : do that
 /* ---------------------------------------------------- */
+
+// TODO: get default routing working
+// TODO: make all class components hooks
+
+
 
 class App extends Component {
 
@@ -27,89 +20,42 @@ class App extends Component {
 
     this.state = {
       data: [],
-      dataByCountry: []
     };
   }
 
   componentDidMount() {
-    this.getRequestToServer('/getLocalData', this.appendData.bind(this))
-  }
-
-  appendData(new_item) {
-
-    // aggregate data here 
-
-    let {dataByCountry} = this.state
-
-    let found = dataByCountry.find((d) => {
-      if (new_item.countrycode === d.countrycode) {
-        d.key_ids = d.key_ids.concat(new_item.key_id)
-        return true
-      } 
-    })
-
-    if (!found) {
-      dataByCountry.push({
-        countrycode: new_item.countrycode, 
-        key_ids:[new_item.key_id]
-      })
-    }
     this.setState(state => {
-      const data = state.data.concat(new_item)
+      const data = true
       return {
-        data,
-        dataByCountry
+        data
       }
-    })
-  }
-
+    })  }
 
   render() {
-    const {dataByCountry, data} = this.state
+    const {} = this.state
     return (
-      <div>
-        <VxGraphs
-          // data={dataByCountry}
-          // drawings={data}
-        />
+      <div className='app-container'>
+        <GlobalSidebar/>
+        <div className='page-view'>
+          <Switch>
+            
+            <Route path='/projects/:projectID'>
+              <Project/>
+            </Route>
 
-        {/* <TestVX
-          width={400}
-          height={400}
-        /> */}
-        {/* <NivoGraphs
-          data={dataByCountry}
-        />
-
-        <SemioticGraphs
-          data={dataByCountry}
-        />  */}
+            <Route path='/projects'>
+              <AllProjects/>
+            </Route>
+            <Route path='/insights'>
+              insights
+            </Route>
+            <Route path='/'>
+              <AllProjects/>
+            </Route>
+          </Switch>
+        </div>
       </div>
     )
-  }
-
-
-
-
-  /* --------------- Networking Methods --------------- */
-
-  /*
-  Example calls:
-    this.getRequestToServer('/getLocalData', this.callback.bind(this))
-  */
-  getRequestToServer(path, callback) {
-    fetch(path)
-      .then((response) => {
-        return ndjsonStream(response.body); //ndjsonStream parses the response.body
-      }).then((exampleStream) => {
-        let read;
-        let reader = exampleStream.getReader()
-        reader.read().then(read = (result) => {
-          if (result.done) return;
-          callback(result.value)
-          reader.read().then(read); //recurse through the stream
-        });
-      });
   }
 
 };

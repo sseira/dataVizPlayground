@@ -1,0 +1,17 @@
+@import "../../assets/stylesheets/colors";
+@import "../../assets/stylesheets/spacing";
+
+
+.all-projects-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.project-overview-container {
+    width: 400px;
+    height: 400px;
+    box-sizing: border-box;
+    border: 1px solid $black;
+    padding: $big-padding;
+}
