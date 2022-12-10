@@ -32,7 +32,7 @@
     "d3-scale-chromatic": "^1.4.0",
     "dotenv": "^6.2.0",
     "exif-js": "^2.3.0",
-    "express": "^4.16.4",
+    "express": "^4.17.3",
     "file-loader": "^3.0.1",
     "file-saver": "^2.0.1",
     "mobile-detect": "^1.4.3",
